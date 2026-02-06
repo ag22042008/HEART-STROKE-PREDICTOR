@@ -1,7 +1,14 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import joblib
 import os
+
+st.set_page_config(
+    page_title="Heart Disease Predictor",
+    page_icon="❤️",
+    layout="centered"
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -9,10 +16,10 @@ model = joblib.load(os.path.join(BASE_DIR, "Logistic_heart2.pkl"))
 scaler = joblib.load(os.path.join(BASE_DIR, "heart_scaler.pkl"))
 expected_columns = joblib.load(os.path.join(BASE_DIR, "columns.pkl"))
 
-st.title("❤️ Heart Stroke Prediction")
-st.markdown("Provide the following details")
+st.title("❤️ Heart Disease Prediction")
+st.write("Enter patient details to assess heart disease risk")
 
-age = st.slider("Age", 18, 100, 40)
+age = st.slider("Age", 18, 100, 45)
 sex = st.selectbox("Sex", ["M", "F"])
 chest_pain = st.selectbox("Chest Pain Type", ["ATA", "NAP", "TA", "ASY"])
 resting_bp = st.number_input("Resting Blood Pressure (mm Hg)", 80, 200, 120)
@@ -24,7 +31,7 @@ exercise_angina = st.selectbox("Exercise-Induced Angina", ["Y", "N"])
 oldpeak = st.slider("Oldpeak (ST Depression)", 0.0, 6.0, 1.0)
 st_slope = st.selectbox("ST Slope", ["Up", "Flat", "Down"])
 
-if st.button("Predict"):
+if st.button("Predict Risk"):
     raw_input = {
         "Age": age,
         "RestingBP": resting_bp,
@@ -32,11 +39,11 @@ if st.button("Predict"):
         "FastingBS": fasting_bs,
         "MaxHR": max_hr,
         "Oldpeak": oldpeak,
-        "Sex_" + sex: 1,
-        "ChestPainType_" + chest_pain: 1,
-        "RestingECG_" + resting_ecg: 1,
-        "ExerciseAngina_" + exercise_angina: 1,
-        "ST_Slope_" + st_slope: 1
+        f"Sex_{sex}": 1,
+        f"ChestPainType_{chest_pain}": 1,
+        f"RestingECG_{resting_ecg}": 1,
+        f"ExerciseAngina_{exercise_angina}": 1,
+        f"ST_Slope_{st_slope}": 1
     }
 
     input_df = pd.DataFrame([raw_input])
@@ -49,9 +56,14 @@ if st.button("Predict"):
 
     scaled_input = scaler.transform(input_df)
 
-    prediction = model.predict(scaled_input)[0]
+    pred = model.predict(scaled_input)[0]
+    prob = model.predict_proba(scaled_input)[0][1] * 100
 
-    if prediction == 1:
-        st.error("⚠️ High Risk of Heart Disease")
+    st.subheader("Prediction Result")
+
+    if pred == 1:
+        st.error(f"⚠️ High Risk of Heart Disease ({prob:.1f}%)")
     else:
-        st.success("✅ Low Risk of Heart Disease")
+        st.success(f"✅ Low Risk of Heart Disease ({prob:.1f}%)")
+
+    st.caption("⚠️ This tool is for educational purposes only.")
