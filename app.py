@@ -15,7 +15,6 @@ model = joblib.load(os.path.join(BASE_DIR, "Logistic_heart2.pkl"))
 scaler = joblib.load(os.path.join(BASE_DIR, "scaler.pkl"))
 expected_columns = joblib.load(os.path.join(BASE_DIR, "columns.pkl"))
 
-# ✅ NUMERIC COLUMNS USED DURING SCALER TRAINING
 numeric_cols = [
     "Age",
     "RestingBP",
@@ -57,20 +56,16 @@ if st.button("Predict Risk"):
 
     input_df = pd.DataFrame([raw_input])
 
-    # Ensure all model columns exist
     for col in expected_columns:
         if col not in input_df.columns:
             input_df[col] = 0
 
     input_df = input_df[expected_columns]
 
-    # ✅ Scale ONLY numeric columns
     input_df[numeric_cols] = scaler.transform(input_df[numeric_cols])
 
     prediction = model.predict(input_df)[0]
     probability = model.predict_proba(input_df)[0][1] * 100
-
-    st.subheader("Prediction Result")
 
     if prediction == 1:
         st.error(f"⚠️ High Risk of Heart Disease ({probability:.1f}%)")
