@@ -56,14 +56,14 @@ if st.button("Predict Risk"):
 
     scaled_input = scaler.transform(input_df)
 
-    pred = model.predict(scaled_input)[0]
-    prob = model.predict_proba(scaled_input)[0][1] * 100
+    prediction = model.predict(scaled_input)[0]
+    probability = model.predict_proba(scaled_input)[0][1] * 100
 
     st.subheader("Prediction Result")
 
-    if pred == 1:
-        st.error(f"⚠️ High Risk of Heart Disease ({prob:.1f}%)")
+    if prediction == 1:
+        st.error(f"⚠️ High Risk of Heart Disease ({probability:.1f}%)")
     else:
-        st.success(f"✅ Low Risk of Heart Disease ({prob:.1f}%)")
+        st.success(f"✅ Low Risk of Heart Disease ({probability:.1f}%)")
 
     st.caption("⚠️ This tool is for educational purposes only.")
